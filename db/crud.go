@@ -2,6 +2,8 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"gorm.io/gorm"
 
 	"tt/model"
@@ -12,19 +14,34 @@ func CreateUser(user *model.User) (err error) {
 }
 
 func UpdateUser(user *model.User) (err error) {
+	if err = Conn.First(&model.User{}, user.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("id: %d doesn't exist", user.ID)
+		}
+		return
+	}
+
 	var updates map[string]interface{}
 	var data []byte
+
 	if data, err = json.Marshal(user); err != nil {
 		return
 	}
 	if err = json.Unmarshal(data, &updates); err != nil {
 		return
 	}
-	return Conn.Transaction(func(tx *gorm.DB) (err error) { return tx.Model(user).Updates(updates).Error })
+
+	return Conn.Model(user).Updates(updates).Error
 }
 
-func DeleteUser(user *model.User) (err error) {
-	return Conn.Delete(user).Error
+func DeleteUser(id int64) (err error) {
+	if err = Conn.First(&model.User{}, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("id: %d doesn't exist", id)
+		}
+		return
+	}
+	return Conn.Delete(&model.User{}, id).Error
 }
 
 func SearchUsersOrdered(emailSubstr, phoneSubstr, orderBy string) (users []model.User, err error) {

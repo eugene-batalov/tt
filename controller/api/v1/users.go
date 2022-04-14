@@ -65,8 +65,7 @@ func DeleteUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	u := &model.User{ID: id}
-	if err = db.DeleteUser(u); err != nil {
+	if err = db.DeleteUser(id); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 	return c.NoContent(http.StatusNoContent)
