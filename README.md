@@ -17,3 +17,5 @@ go run main.go
 ```
 
 ## Open http://localhost:1323/api/v1/swagger/index.html
+
+## Deployed version http://51.250.101.88:1323/api/v1/swagger/index.html
